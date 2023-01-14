@@ -33,9 +33,74 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          {{- if .Values.linkding.username }}
+            - name: LD_SUPERUSER_NAME
+              value: {{ .Values.linkding.username }}
+          {{- end }}
+          {{- if .Values.linkding.password }}
+            - name: LD_SUPERUSER_PASSWORD
+              value: {{ .Values.linkding.password }}
+          {{- end }}
+          {{- if .Values.linkding.disableBackgroundTasks }}
+            - name: LD_DISABLE_BACKGROUND_TASKS
+              value: {{ .Values.linkding.disableBackgroundTasks | quote }}
+          {{- end }}
+          {{- if .Values.linkding.disableUrlValidation }}
+            - name: LD_DISABLE_URL_VALIDATION
+              value: {{ .Values.linkding.disableUrlValidation | quote }}
+          {{- end }}
+          {{- if .Values.linkding.requestTimeout }}
+            - name: LD_REQUEST_TIMEOUT
+              value: {{ .Values.linkding.requestTimeout | quote }}
+          {{- end }}
+          {{- if .Values.linkding.serverPort }}
+            - name: LD_SERVER_PORT
+              value: {{ .Values.linkding.serverPort | quote }}
+          {{- end }}
+          {{- if .Values.linkding.contextPath }}
+            - name: LD_CONTEXT_PATH
+              value: {{ .Values.linkding.contextPath }}
+          {{- end }}
+          {{- if .Values.linkding.enableAuthProxy }}
+            - name: LD_ENABLE_AUTH_PROXY
+              value: {{ .Values.linkding.enableAuthProxy }}
+          {{- end }}
+          {{- if .Values.linkding.proxyUsernameHeader }}
+            - name: LD_PROXY_USERNAME_HEADER
+              value: {{ .Values.linkding.proxyUsernameHeader }}
+          {{- end }}
+          {{- if .Values.linkding.proxyLogoutUrl }}
+            - name: LD_PROXY_LOGOUT_URL
+              value: {{ .Values.linkding.proxyLogoutUrl }}
+          {{- end }}
+          {{- if .Values.linkding.csrfTrustedOrigins }}
+            - name: LD_CSRF_TRUSTED_ORIGINS
+              value: {{ .Values.linkding.csrfTrustedOrigins }}
+          {{- end }}
+          {{- if .Values.postgresql.enabled }}
+            - name: LD_DB_ENGINE
+              value: postgres
+            - name: LD_DB_HOST
+              value: {{ template "postgresql.primary.fullname" .Subcharts.postgresql }}
+            - name: LD_DB_PORT
+              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+            - name: LD_DB_DATABASE
+              value: {{ .Values.postgresql.global.postgresql.auth.database }}
+            - name: LD_DB_USER
+              value: {{ .Values.postgresql.global.postgresql.auth.username }}
+            - name: LD_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgresql.global.postgresql.auth.existingSecret | default (printf "%s-postgresql" .Release.Name ) }}
+                  key: password
+          {{- else }}
+            - name: LD_DB_ENGINE
+              value: sqlite
+          {{- end }}
           ports:
             - name: http
-              containerPort: 9090
+              containerPort: {{ .Values.linkding.serverPort }}
               protocol: TCP
           livenessProbe:
             httpGet:

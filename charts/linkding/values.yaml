@@ -46,6 +46,19 @@ service:
   type: ClusterIP
   port: 9090
 
+linkding:
+  username: admin
+  password: "!CHANGEME!"
+  disableBackgroundTasks: false
+  disableUrlValidation: false
+  requestTimeout: 60
+  serverPort: 9090
+  #contextPath:
+  enableAuthProxy: false
+  #proxyUsernameHeader:
+  #proxyLogoutUrl:
+  #csrfTrustedOrigins:
+
 ingress:
   enabled: false
   className: nginx
