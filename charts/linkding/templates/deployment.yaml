@@ -66,13 +66,13 @@ spec:
             - name: LD_ENABLE_AUTH_PROXY
               value: {{ .Values.linkding.enableAuthProxy | int | quote }}
           {{- end }}
-          {{- if .Values.linkding.proxyUsernameHeader }}
-            - name: LD_PROXY_USERNAME_HEADER
-              value: {{ .Values.linkding.proxyUsernameHeader }}
+          {{- if .Values.linkding.authProxyUsernameHeader }}
+            - name: LD_AUTH_PROXY_USERNAME_HEADER
+              value: {{ .Values.linkding.authProxyUsernameHeader }}
           {{- end }}
-          {{- if .Values.linkding.proxyLogoutUrl }}
-            - name: LD_PROXY_LOGOUT_URL
-              value: {{ .Values.linkding.proxyLogoutUrl }}
+          {{- if .Values.linkding.authProxyLogoutUrl }}
+            - name: LD_AUTH_PROXY_LOGOUT_URL
+              value: {{ .Values.linkding.authProxyLogoutUrl }}
           {{- end }}
           {{- if .Values.linkding.csrfTrustedOrigins }}
             - name: LD_CSRF_TRUSTED_ORIGINS

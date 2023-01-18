@@ -55,8 +55,8 @@ linkding:
   serverPort: 9090
   #contextPath:
   enableAuthProxy: false
-  #proxyUsernameHeader:
-  #proxyLogoutUrl:
+  #authProxyUsernameHeader:
+  #authProxyLogoutUrl:
   #csrfTrustedOrigins:
 
 ingress:
