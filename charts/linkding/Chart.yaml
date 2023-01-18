@@ -28,3 +28,8 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 12.1.7
   condition: postgresql.enabled
+- name: oauth2-proxy
+  repository: https://charts.bitnami.com/bitnami
+  version: 3.4.3
+  alias: oauth2Proxy
+  condition: oauth2Proxy.enabled
