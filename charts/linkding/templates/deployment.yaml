@@ -44,11 +44,11 @@ spec:
           {{- end }}
           {{- if .Values.linkding.disableBackgroundTasks }}
             - name: LD_DISABLE_BACKGROUND_TASKS
-              value: {{ .Values.linkding.disableBackgroundTasks | quote }}
+              value: {{ .Values.linkding.disableBackgroundTasks | int | quote }}
           {{- end }}
           {{- if .Values.linkding.disableUrlValidation }}
             - name: LD_DISABLE_URL_VALIDATION
-              value: {{ .Values.linkding.disableUrlValidation | quote }}
+              value: {{ .Values.linkding.disableUrlValidation | int | quote }}
           {{- end }}
           {{- if .Values.linkding.requestTimeout }}
             - name: LD_REQUEST_TIMEOUT
@@ -64,7 +64,7 @@ spec:
           {{- end }}
           {{- if .Values.linkding.enableAuthProxy }}
             - name: LD_ENABLE_AUTH_PROXY
-              value: {{ .Values.linkding.enableAuthProxy }}
+              value: {{ .Values.linkding.enableAuthProxy | int | quote }}
           {{- end }}
           {{- if .Values.linkding.proxyUsernameHeader }}
             - name: LD_PROXY_USERNAME_HEADER
