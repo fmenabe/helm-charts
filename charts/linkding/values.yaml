@@ -48,7 +48,7 @@ service:
 
 linkding:
   username: admin
-  password: "!CHANGEME!"
+  #password:
   disableBackgroundTasks: false
   disableUrlValidation: false
   requestTimeout: 60
@@ -101,8 +101,8 @@ tolerations: []
 
 affinity: {}
 
-#oauth2Proxy:
-#  enabled: false
+oauth2Proxy:
+  enabled: false
 #  nameOverride: oauth2-proxy
 #
 #  redis:
