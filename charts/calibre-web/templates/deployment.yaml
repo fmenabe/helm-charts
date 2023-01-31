@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "calibre-web.fullname" . }}
+  labels:
+    {{- include "calibre-web.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "calibre-web.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "calibre-web.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "calibre-web.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: PUID
+            value: "1000"
+          - name: PGID
+            value: "1000"
+          - name: TZ
+            value: {{ .Values.calibreWeb.timezone }}
+          {{- if .Values.calibreWeb.enableEbookConverter }}
+          - name: DOCKER_MODS
+            value: linuxserver/mods:universal-calibre
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            failureThreshold: 12
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: calibre-web-config
+            mountPath: /custom-cont-init.d
+          {{- if .Values.persistence.data.enabled}}
+          - name: calibre-web-data
+            mountPath: /config
+          {{- end }}
+          {{- if .Values.persistence.library.enabled }}
+          - name: calibre-web-library
+            mountPath: {{ .Values.calibreWeb.libraryDir }}
+          {{- end }}
+      volumes:
+      - name: calibre-web-config
+        configMap:
+          name: {{ include "calibre-web.fullname" . }}-config
+      #- name: calibre-web-secret
+      #  secret:
+      #    secretName: {{ include "calibre-web.fullname" . }}-secret
+      {{- if .Values.persistence.data.enabled}}
+      - name: calibre-web-data
+        persistentVolumeClaim:
+          claimName: {{ default .Values.persistence.data.existingClaim (printf "%s-data" (include "calibre-web.fullname" .)) }}
+      {{- end }}
+      {{- if .Values.persistence.library.enabled }}
+      - name: calibre-web-library
+        persistentVolumeClaim:
+          claimName: {{ default .Values.persistence.library.existingClaim (printf "%s-library" (include "calibre-web.fullname" .)) }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

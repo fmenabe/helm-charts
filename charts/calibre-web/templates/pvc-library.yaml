@@ -1,0 +1,22 @@
+{{- if .Values.persistence.library.enabled }}
+{{- if not .Values.persistence.library.existingClaim }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "calibre-web.fullname" . }}-library
+  labels:
+    {{- include "calibre-web.labels" . | nindent 4 }}
+{{- if .Values.persistence.library.annotations }}
+annotations:
+{{ toYaml .Values.persistence.library.annotations | indent 4 }}
+{{- end }}
+spec:
+  accessModes:
+  - {{ .Values.persistence.library.accessMode }}
+  storageClassName: {{ default .Values.persistence.library.storageClass "" }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.library.size | quote }}
+{{- end }}
+{{- end }}

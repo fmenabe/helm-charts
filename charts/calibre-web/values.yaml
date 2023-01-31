@@ -1,0 +1,184 @@
+# Default values for calibre-web.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: linuxserver/calibre-web
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8083
+
+persistence:
+  data:
+    enabled: false
+    #storageClass:
+    accessMode: ReadWriteOnce
+    size: 2Gi
+
+  library:
+    enabled: false
+    #storageClass:
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+calibreWeb:
+  timezone: Europe/Paris
+  enableEbookConverter: false
+  #adminPassword:
+  #serverPort: 8083
+  libraryDir: /books
+  # Do not redefine `config_calibre_dir` as it is managed by previous
+  # `libraryDir` parameter.
+  #configuration:
+  #  mail_server: mail.example.org
+  #  mail_port: 25
+  #  mail_use_ssl: false
+  #  mail_login: mail@example.com
+  #  mail_password: mypassword
+  #  mail_from: "automailer <mail@example.com>"
+  #  mail_size: 26214400
+  #  mail_server_type: 0
+  #  mail_gmail_token: {}
+  #  config_port: 8083
+  #  config_external_port: 8083
+  #  config_certfile:
+  #  config_keyfile:
+  #  config_trustedhosts:
+  #  config_calibre_web_title: Calibre-Web
+  #  config_books_per_page: 60
+  #  config_random_books: 4
+  #  config_authors_max:0
+  #  config_read_column: 0
+  #  config_title_regex: '^(A|The|An|Der|Die|Das|Den|Ein|Eine|Einen|Dem|Des|Einem|Eines)\s+'
+  #  config_theme: 0
+  #  config_log_level: 20
+  #  config_logfile:
+  #  config_access_log: 0
+  #  config_access_logfile:
+  #  config_uploading: 1
+  #  config_anonbrowse: 0
+  #  config_public_reg: 0
+  #  config_remote_login: false
+  #  config_kobo_sync: false
+  #  config_default_role: 0
+  #  config_default_show: 262143
+  #  config_default_language: all
+  #  config_default_locale: en
+  #  config_columns_to_ignore:
+  #  config_denied_tags:
+  #  config_allowed_tags:
+  #  config_restricted_column: 0
+  #  config_denied_column_value:
+  #  config_allowed_column_value:
+  #  config_use_google_drive: false
+  #  config_google_drive_folder:
+  #  config_google_drive_watch_changes_response: {}
+  #  config_use_goodreads: false
+  #  config_goodreads_api_key:
+  #  config_goodreads_api_secret:
+  #  config_register_email: false
+  #  config_login_type: 0
+  #  config_kobo_proxy: false
+  #  config_ldap_provider_url: example.org
+  #  config_ldap_port: 389
+  #  config_ldap_authentication: 0
+  #  config_ldap_serv_username: cn=admin,dc=example,dc=org
+  #  config_ldap_serv_password:
+  #  config_ldap_encryption:0
+  #  config_ldap_cacert_path:
+  #  config_ldap_cert_path:
+  #  config_ldap_key_path:
+  #  config_ldap_dn: dc=example,dc=org
+  #  config_ldap_user_object: uid=%s
+  #  config_ldap_member_user_object:
+  #  config_ldap_openldap: true
+  #  config_ldap_group_object_filter: '(&(objectclass=posixGroup)(cn=%s))'
+  #  config_ldap_group_members_field: memberUid
+  #  config_ldap_group_name: calibreweb
+  #  config_kepubifypath:
+  #  config_converterpath:
+  #  config_calibre:
+  #  config_rarfile_location: /usr/bin/unrar
+  #  config_upload_formats: m4b,pdf,flac,wav,cbz,m4a,djvu,cbt,fb2,mp4,prc,azw,epub,doc,ogg,mobi,kepub,odt,rtf,lit,txt,cbr,docx,mp3,azw3,opus,html
+  #  config_unicode_filename: false
+  #  config_updatechannel: 0
+  #  config_reverse_proxy_login_header_name:
+  #  config_allow_reverse_proxy_header_login: 0
+  #  schedule_start_time: 4
+  #  schedule_duration: 10
+  #  schedule_generate_book_covers: false
+  #  schedule_generate_series_covers: false
+  #  schedule_reconnect: false
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
