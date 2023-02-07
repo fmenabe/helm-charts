@@ -182,3 +182,38 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+oauth2Proxy:
+  enabled: false
+  #nameOverride: oauth2-proxy
+
+  #redis:
+  #  enabled: true
+  #  replica:
+  #    replicaCount: 1
+
+  #configuration:
+  #  clientID: calibre-web
+  #  clientSecret: <YOUR_CLIENT_SECRET>
+  #  # openssl rand -base64 32 | tr -- '+/' '-_'
+  #  cookieSecret: <YOUR_COOKIE_SECRET>
+  #  content: |
+  #    provider = "keycloak-oidc"
+  #    email_domains = [ "*" ]
+  #    upstreams = [ "file:///dev/null" ]
+  #    set_xauthrequest = true
+  #  oidcIssuerUrl: https://<KEYCLOAK_HOST>/realms/fmenabe-staging
+  #  redirectUrl: https://<APP_HOST>/oauth2/callback
+
+  #ingress:
+  #  enabled: true
+  #  ingressClassName: nginx
+  #  hostname: <APP_HOST>
+  #  path: /oauth2
+  #  annotations:
+  #    nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+  #  tls: false
+  #  extraTls:
+  #  - hosts:
+  #    - <APP_HOST>
+  #    secretName: calibre-web-tls
