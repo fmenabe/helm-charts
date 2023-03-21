@@ -36,7 +36,7 @@ spec:
           command: [ "sh", "-c" ]
           args:
             - |
-              php console.php database:install -n
+              php console.php database:install -n && php console.php users:password admin $TIKI_ADMIN_PWD
               php console.php database:update -n
           env:
             - name: TIKI_DB_HOST
@@ -50,6 +50,11 @@ spec:
                   key: mariadb-password
             - name: TIKI_DB_NAME
               value: {{ .Values.mariadb.auth.database }}
+            - name: TIKI_ADMIN_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tikiwiki.fullname" . }}
+                  key: admin-password
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

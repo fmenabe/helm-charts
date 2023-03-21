@@ -89,3 +89,5 @@ tolerations: []
 
 affinity: {}
 
+tikiwiki:
+  adminPassword: "CHANGEME!"
