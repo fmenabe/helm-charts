@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openldap.fullname" . }}
+  labels:
+    {{- include "openldap.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "openldap.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "openldap.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "openldap.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/opt/bitnami/scripts/openldap/run.sh"]
+          env:
+            - name: LDAP_PORT_NUMBER
+              value: {{ .Values.service.port | quote }}
+            - name: LDAP_ROOT
+              value: {{ .Values.openldap.root }}
+            - name: LDAP_ADMIN_USERNAME
+              #value: {{ .Values.openldap.admin.username }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "openldap.fullname" . }}
+                  key: admin-username
+            - name: LDAP_ADMIN_PASSWORD
+              #value: {{ .Values.openldap.admin.password }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "openldap.fullname" . }}
+                  key: admin-password
+            - name: LDAP_CONFIG_ADMIN_ENABLED
+              value: {{ .Values.openldap.configAdmin.enabled | quote }}
+            {{- if .Values.openldap.configAdmin.enabled }}
+            - name: LDAP_CONFIG_ADMIN_USERNAME
+              #value: {{ .Values.openldap.configAdmin.username }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "openldap.fullname" . }}
+                  key: config-username
+            - name: LDAP_CONFIG_ADMIN_PASSWORD
+              #value: {{ .Values.openldap.configAdmin.password }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "openldap.fullname" . }}
+                  key: config-password
+            {{- end }}
+            - name: LDAP_ADD_SCHEMAS
+              value: {{ .Values.openldap.extraSchemas.enabled | quote }}
+            - name: LDAP_EXTRA_SCHEMAS
+              value: {{ join "," .Values.openldap.extraSchemas.schemas }}
+            - name: LDAP_CUSTOM_SCHEMA_FILE
+              value: {{ .Values.openldap.customSchemaFile }}
+            - name: LDAP_CUSTOM_SCHEMA_DIR
+              value: {{ .Values.openldap.customSchemaDir }}
+            - name: LDAP_USER_DC
+              value: {{ .Values.openldap.userDC }}
+            - name: LDAP_SKIP_DEFAULT_TREE
+              value: "yes"
+            - name: LDAP_CUSTOM_LDIF_DIR
+              value: {{ .Values.openldap.customLdifDir }}
+            - name: LDAP_ULIMIT_NOFILES
+              value: {{ .Values.openldap.ulimitNoFiles | quote }}
+            - name: LDAP_ALLOW_ANON_BINDING
+              value: {{ .Values.openldap.allowAnonBinding | quote }}
+            - name: LDAP_LOG_LEVEL
+              value: {{ .Values.openldap.logLevel | quote }}
+          ports:
+            - name: ldap
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: ldap
+          readinessProbe:
+            tcpSocket:
+              port: ldap
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+            - name: openldap-data
+              mountPath: /bitnami/openldap
+            {{- end }}
+            - name: openldap-custom-schemas
+              mountPath: {{ .Values.openldap.customSchemaDir }}
+            - name: openldap-custom-ldifs
+              mountPath: {{ .Values.openldap.customLdifDir }}
+      volumes:
+        {{- if .Values.persistence.enabled }}
+        - name: openldap-data
+          persistentVolumeClaim:
+            claimName: {{ include "openldap.fullname" . }}
+        {{- end }}
+        - name: openldap-custom-schemas
+          # https://kubernetes.io/docs/concepts/storage/projected-volumes/
+          projected:
+            sources:
+              {{- range $secret := .Values.openldap.customSchemaSecrets }}
+              - secret:
+                  name: {{ $secret }}
+              {{- end }}
+              {{- range $cm := .Values.openldap.customSchemaConfigMaps }}
+              - configMap:
+                  name: {{ $cm }}
+              {{- end }}
+        - name: openldap-custom-ldifs
+          # https://kubernetes.io/docs/concepts/storage/projected-volumes/
+          projected:
+            sources:
+              {{- range $secret := .Values.openldap.customLdifSecrets }}
+              - secret:
+                  name: {{ $secret }}
+              {{- end }}
+              {{- range $cm := .Values.openldap.customLdifConfigMaps }}
+              - configMap:
+                  name: {{ $cm }}
+              {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
