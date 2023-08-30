@@ -24,10 +24,11 @@ serviceAccount:
   name: ""
 
 persistence:
+  enabled: false
   accessMode: ReadWriteOnce
   #storageClassName:
   #annotations:
-  size: 10Gi
+  size: 256Mi
 
 podAnnotations: {}
 
@@ -111,17 +112,18 @@ oauth2Proxy:
 #      replicaCount: 1
 #
 #  configuration:
-#    clientID: <CLIENT_ID>
-#    clientSecret: <CLIENT_SECRET>
+#    clientID: FIXME
+#    clientSecret: FIXME
 #    # openssl rand -base64 32 | head -c 32 | base64
-#    cookieSecret: <COOKIE_SECRET>
+#    cookieSecret: FIXME
 #    content: |
-#      provider: "keycloak-oidc"
+#      provider = "keycloak-oidc"
 #      email_domains = [ "*" ]
 #      upstreams = [ "file:///dev/null" ]
 #      set_xauthrequest = true
-#    oidcIssuerUrl: https://<KEYCLOAK_HOST>/realms/<REALM>
+#    #oidcIssuerUrl: https://<KEYCLOAK_HOST>/realms/<REALM>
 #    #oidcIssuerUrl: https://<KEYCLOAK_HOST>/auth/realms/<REALM>
+#    oidcIssuerUrl: FIXME
 #    redirectUrl: https://linkding.local/oauth2/callback
 #
 #  ingress:
