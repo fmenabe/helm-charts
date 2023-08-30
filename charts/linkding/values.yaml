@@ -59,6 +59,7 @@ linkding:
   #authProxyUsernameHeader:
   #authProxyLogoutUrl:
   #csrfTrustedOrigins:
+  logXForwardedFor: true
 
 ingress:
   enabled: false

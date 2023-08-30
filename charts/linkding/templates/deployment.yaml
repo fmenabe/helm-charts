@@ -78,6 +78,10 @@ spec:
             - name: LD_CSRF_TRUSTED_ORIGINS
               value: {{ .Values.linkding.csrfTrustedOrigins }}
           {{- end }}
+          {{- if .Values.linkding.logXForwardedFor }}
+            - name: LD_LOG_X_FORWARDED_FOR
+              value: {{ .Values.linkding.logXForwardedFor | int | quote }}
+          {{- end }}
           {{- if .Values.postgresql.enabled }}
             - name: LD_DB_ENGINE
               value: postgres
