@@ -29,41 +29,12 @@ spec:
       serviceAccountName: {{ include "qbittorrentvpn.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      initContainers:
-        - name: {{ .Chart.Name }}-init
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          command:
-            - sh
-            - -xc
-            - |
-              apt update && apt install -y curl
-              curl -s https://configs.ipvanish.com/configs/configs.zip -o /config/configs.zip
-              mkdir -p /config/openvpn
-              unzip -p /config/configs.zip $VPN_CONFIG.ovpn > /config/openvpn/01-$VPN_CONFIG.ovpn
-              unzip -p /config/configs.zip ca.ipvanish.com.crt > /config/openvpn/ca.ipvanish.com.crt
-              sed -i.bak 's/proto udp/proto tcp-client/g' /config/openvpn/01-$VPN_CONFIG.ovpn
-          env:
-            - name: VPN_PROVIDER
-              value: {{ .Values.openvpn.provider }}
-            - name: VPN_CONFIG
-              value: {{ .Values.openvpn.config }}
-          volumeMounts:
-          {{- if .Values.persistence.config.enabled }}
-            - mountPath: /config
-              name: config
-          {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - sh
-            - -xc
-            - |
-              sed -i.bak -E 's/([ ]*)exec openvpn (.*) \&/\1exec openvpn --proto tcp-client \2 \&/g' /etc/openvpn/start.sh
-              /etc/openvpn/start.sh
           env:
             - name: VPN_TYPE
               value: openvpn
@@ -96,24 +67,42 @@ spec:
           volumeMounts:
           {{- if .Values.persistence.data.enabled }}
             - mountPath: /downloads
-              name: data
+              name: downloads
           {{- end }}
           {{- if .Values.persistence.config.enabled }}
+            - mountPath: /config/qBittorrent
+              name: data
+          {{- end }}
+          {{- if .Values.vpn.existingConfigMap }}
             - mountPath: /config
-              name: config
+              name: vpn-config
+          {{- end }}
+          {{- if .Values.vpn.existingSecret }}
+            - mountPath: /config/{{ .Values.vpn.type }}
+              name: vpn-config
           {{- end }}
             - name: dev-tun
               mountPath: /dev/net/tun
       volumes:
       {{- if .Values.persistence.data.enabled }}
-        - name: data
+        - name: downloads
           persistentVolumeClaim:
             claimName: {{ default .Values.persistence.data.existingClaim (printf "%s-data" (include "qbittorrentvpn.fullname" . )) }}
       {{- end }}
       {{- if .Values.persistence.config.enabled }}
-        - name: config
+        - name: data
           persistentVolumeClaim:
             claimName: {{ default .Values.persistence.config.existingClaim (printf "%s-config" (include "qbittorrentvpn.fullname" . )) }}
+      {{- end }}
+      {{- if .Values.vpn.existingConfigMap }}
+        - name: vpn-config
+          configMap:
+            name: {{ .Values.vpn.existingConfigMap }}
+      {{- end }}
+      {{- if .Values.vpn.existingSecret }}
+        - name: vpn-config
+          secret:
+            secretName: {{ .Values.vpn.existingSecret }}
       {{- end }}
         - name: dev-tun
           hostPath:
