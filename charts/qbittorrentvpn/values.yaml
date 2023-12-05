@@ -34,11 +34,20 @@ securityContext:
       - NET_ADMIN
 
 persistence:
-  enabled: false
-  accessMode: ReadWriteOnce
-  storageClass:
-  #annotations:
-  size: 2Gi
+  config:
+    enabled: false
+    #existingClaim:
+    accessMode: ReadWriteOnce
+    storageClass:
+    #annotations:
+    size: 128Mi
+  data:
+    enabled: false
+    #existingClaim:
+    accessMode: ReadWriteOnce
+    storageClass:
+    #annotations:
+    size: 2Gi
 
 hostNetwork: false
 

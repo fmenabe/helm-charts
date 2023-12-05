@@ -1,0 +1,22 @@
+{{- if .Values.persistence.data.enabled }}
+{{- if not .Values.persistence.data.existingClaim }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "qbittorrentvpn.fullname" . }}-data
+  labels:
+    {{- include "qbittorrentvpn.labels" . | nindent 4 }}
+{{- if .Values.persistence.data.annotations }}
+  annotations:
+{{ toYaml .Values.persistence.data.annotations | indent 4 }}
+{{- end }}
+spec:
+  accessModes:
+    - {{ .Values.persistence.data.accessMode }}
+  storageClassName: {{ .Values.persistence.data.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.data.size | quote }}
+{{- end }}
+{{- end }}

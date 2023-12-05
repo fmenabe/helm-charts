@@ -80,11 +80,11 @@ spec:
           volumeMounts:
           {{- if .Values.persistence.data.enabled }}
             - mountPath: /downloads
-              name: downloads
+              name: data
           {{- end }}
           {{- if .Values.persistence.config.enabled }}
             - mountPath: /config/qBittorrent
-              name: data
+              name: config
           {{- end }}
           {{- if .Values.vpn.existingConfigMap }}
             - mountPath: /config
@@ -98,14 +98,14 @@ spec:
               mountPath: /dev/net/tun
       volumes:
       {{- if .Values.persistence.data.enabled }}
-        - name: downloads
-          persistentVolumeClaim:
-            claimName: {{ default .Values.persistence.data.existingClaim (printf "%s-data" (include "qbittorrentvpn.fullname" . )) }}
-      {{- end }}
-      {{- if .Values.persistence.config.enabled }}
         - name: data
           persistentVolumeClaim:
-            claimName: {{ default .Values.persistence.config.existingClaim (printf "%s-config" (include "qbittorrentvpn.fullname" . )) }}
+            claimName: {{ if .Values.persistence.data.existingClaim }}{{ .Values.persistence.data.existingClaim }}{{ else }}{{ printf "%s-data" (include "qbittorrentvpn.fullname" . ) }}{{ end }}
+      {{- end }}
+      {{- if .Values.persistence.config.enabled }}
+        - name: config
+          persistentVolumeClaim:
+            claimName: {{ if .Values.persistence.config.existingClaim }}{{ .Values.persistence.config.existingClaim }}{{ else }}{{ printf "%s-config" (include "qbittorrentvpn.fullname" . ) }}{{ end }}
       {{- end }}
       {{- if .Values.vpn.existingConfigMap }}
         - name: vpn-config
