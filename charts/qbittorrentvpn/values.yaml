@@ -41,9 +41,13 @@ persistence:
   size: 2Gi
 
 hostNetwork: false
-service:
-  type: ClusterIP
+
+http:
   port: 8080
+  service:
+    enabled: true
+    type: ClusterIP
+    annotations: {}
 
 ingress:
   enabled: false

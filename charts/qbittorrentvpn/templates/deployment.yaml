@@ -53,7 +53,7 @@ spec:
               value: {{ .Values.openvpn.lanNetwork }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.port }}
+              containerPort: {{ .Values.http.port }}
               protocol: TCP
           livenessProbe:
             httpGet:

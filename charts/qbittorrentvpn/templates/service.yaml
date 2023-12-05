@@ -1,15 +1,21 @@
+{{- if .Values.http.service.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "qbittorrentvpn.fullname" . }}
+  name: {{ include "qbittorrentvpn.fullname" . }}-http
   labels:
     {{- include "qbittorrentvpn.labels" . | nindent 4 }}
+{{- if .Values.http.service.annotations }}
+annotations:
+{{ toYaml .Values.http.service.annotations | indent 2 }}
+{{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.http.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.http.port }}
       targetPort: http
       protocol: TCP
       name: http
   selector:
     {{- include "qbittorrentvpn.selectorLabels" . | nindent 4 }}
+{{- end }}
