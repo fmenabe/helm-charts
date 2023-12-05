@@ -37,20 +37,26 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: VPN_ENABLED
+              value: {{ (.Values.vpn.enabled | ternary "yes" "no")|quote }}
+            {{- if .Values.vpn.enabled }}
             - name: VPN_TYPE
-              value: openvpn
+              value: {{ .Values.vpn.type }}
+            {{- if eq .Values.vpn.type "openvpn" }}
             - name: VPN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ default .Values.openvpn.existingSecret (printf "%s-openvpn" (include "qbittorrentvpn.fullname" .)) }}
+                  name: {{ default .Values.vpn.openvpn.existingSecret (printf "%s-openvpn" (include "qbittorrentvpn.fullname" .)) }}
                   key: username
             - name: VPN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ default .Values.openvpn.existingSecret (printf "%s-openvpn" (include "qbittorrentvpn.fullname" .)) }}
+                  name: {{ default .Values.vpn.openvpn.existingSecret (printf "%s-openvpn" (include "qbittorrentvpn.fullname" .)) }}
                   key: password
+            {{- end }}
             - name: LAN_NETWORK
-              value: {{ .Values.openvpn.lanNetwork }}
+              value: {{ .Values.vpn.lanNetwork }}
+            {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.http.port }}

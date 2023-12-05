@@ -93,9 +93,14 @@ tolerations: []
 
 affinity: {}
 
-openvpn:
-  provider: ipvanish
-  config: ipvanish-FR-Paris-par-a01
-  username: FIXME
-  password: FIXME
+vpn:
+  enabled: false
   lanNetwork: 100.0.0.0/8
+  type: wireguard
+  # one of this is required and contains VPN configuration
+  #existingConfigMap:
+  #existingSecret:
+  #openvpn:
+  #  #exstingSecret:
+  #  username: FIXME
+  #  password: FIXME
