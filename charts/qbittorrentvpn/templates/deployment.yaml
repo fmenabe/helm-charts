@@ -55,6 +55,12 @@ spec:
             - name: http
               containerPort: {{ .Values.http.port }}
               protocol: TCP
+            - name: torrent
+              containerPort: {{ .Values.incoming.port }}
+              protocol: TCP
+            - name: udp
+              containerPort: {{ .Values.incoming.port }}
+              protocol: UDP
           livenessProbe:
             httpGet:
               path: /

@@ -49,6 +49,9 @@ http:
     type: ClusterIP
     annotations: {}
 
+incoming:
+  port: 8999
+
 ingress:
   enabled: false
   className: ""
