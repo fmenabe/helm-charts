@@ -40,6 +40,7 @@ persistence:
   #annotations:
   size: 2Gi
 
+hostNetwork: false
 service:
   type: ClusterIP
   port: 8080

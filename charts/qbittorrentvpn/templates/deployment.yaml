@@ -22,6 +22,7 @@ spec:
       labels:
         {{- include "qbittorrentvpn.selectorLabels" . | nindent 8 }}
     spec:
+      hostNetwork: {{ .Values.hostNetwork }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
