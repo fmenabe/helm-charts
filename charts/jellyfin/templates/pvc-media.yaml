@@ -1,0 +1,22 @@
+{{- range $media := .Values.persistence.medias }}
+{{- if not $media.existingClaim }}
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "jellyfin.fullname" $ }}-{{ $media.name }}
+  labels:
+    {{- include "jellyfin.labels" $ | nindent 4 }}
+{{- if $media.annotations }}
+  annotations:
+{{ toYaml $media.annotations | indent 4 }}
+{{- end }}
+spec:
+  accessModes:
+  - {{ $media.accessMode }}
+  storageClassName: {{ $media.storageClass }}
+  resources:
+    requests:
+      storage: {{ $media.size | quote }}
+{{- end }}
+{{- end }}

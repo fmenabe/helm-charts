@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jellyfin.fullname" . }}
+  labels:
+    {{- include "jellyfin.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "jellyfin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "jellyfin.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "jellyfin.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      hostNetwork: {{ .Values.hostNetwork }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: JELLYFIN_PublishedServerUrl
+            value: http://{{ .Values.jellyfinHost }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.persistence.config.enabled }}
+          - name: config
+            mountPath: /config
+          {{- end }}
+          {{- if .Values.persistence.cache.enabled }}
+          - name: cache
+            mountPath: /cache
+          {{- end }}
+          {{- range $media := .Values.persistence.medias }}
+          - name: {{ $media.name }}
+            mountPath: /{{ $media.name }}
+          {{- end }}
+      volumes:
+      {{- if .Values.persistence.config.enabled }}
+      - name: config
+        persistentVolumeClaim:
+          claimName: {{ if .Values.persistence.config.existingClaim }}{{ .Values.persistence.config.existingClaim }}{{ else }}{{ printf "%s-config" (include "jellyfin.fullname" . ) }}{{ end }}
+      {{- end }}
+      {{- if .Values.persistence.cache.enabled }}
+      - name: cache
+        persistentVolumeClaim:
+          claimName: {{ if .Values.persistence.cache.existingClaim }}{{ .Values.persistence.cache.existingClaim }}{{ else }}{{ printf "%s-cache" (include "jellyfin.fullname" . ) }}{{ end }}
+      {{- end }}
+      {{- range $media := .Values.persistence.medias }}
+      - name: {{ $media.name }}
+        persistentVolumeClaim:
+          claimName: {{ if .existingClaim }}{{ .existingClaim }}{{ else }}{{ printf "%s-%s" (include "jellyfin.fullname" $ ) $media.name }}{{ end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
