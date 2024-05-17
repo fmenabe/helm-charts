@@ -50,17 +50,17 @@ spec:
               protocol: TCP
           startupProbe:
             httpGet:
-              path: /
+              path: /login
               port: http
             failureThreshold: 12
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /
+              path: /login
               port: http
           readinessProbe:
             httpGet:
-              path: /
+              path: /login
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
