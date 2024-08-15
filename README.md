@@ -3,7 +3,7 @@
 ## Usage
 
 ```
-helm repo add fmenabe https://charts.fmenabe.me/library
+helm install <RELEASE> oci://charts.fmena.be/charts/<CHART>
 ```
 
 ## Third-party charts
