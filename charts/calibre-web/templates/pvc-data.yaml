@@ -9,7 +9,7 @@ metadata:
     {{- include "calibre-web.labels" . | nindent 4 }}
 {{- if .Values.persistence.data.annotations }}
 annotations:
-{{ toYaml .Values.persistence.data.annotations | indent 4 }}
+{{ toYaml .Values.persistence.data.annotations | indent 2 }}
 {{- end }}
 spec:
   accessModes:

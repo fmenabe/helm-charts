@@ -34,16 +34,19 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          - name: PUID
-            value: "1000"
-          - name: PGID
-            value: "1000"
-          - name: TZ
-            value: {{ .Values.calibreWeb.timezone }}
-          {{- if .Values.calibreWeb.enableEbookConverter }}
-          - name: DOCKER_MODS
-            value: linuxserver/mods:universal-calibre
-          {{- end }}
+            - name: CALIBRE_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "calibre-web.fullname" . }}-secret
+                  key: username
+            - name: CALIBRE_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "calibre-web.fullname" . }}-secret
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: {{ include "calibre-web.fullname" . }}-envs
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
@@ -65,23 +68,15 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-          - name: calibre-web-config
-            mountPath: /custom-cont-init.d
           {{- if .Values.persistence.data.enabled}}
           - name: calibre-web-data
-            mountPath: /config
+            mountPath: /data
           {{- end }}
           {{- if .Values.persistence.library.enabled }}
           - name: calibre-web-library
-            mountPath: {{ .Values.calibreWeb.libraryDir }}
+            mountPath: /books
           {{- end }}
       volumes:
-      - name: calibre-web-config
-        configMap:
-          name: {{ include "calibre-web.fullname" . }}-config
-      #- name: calibre-web-secret
-      #  secret:
-      #    secretName: {{ include "calibre-web.fullname" . }}-secret
       {{- if .Values.persistence.data.enabled}}
       - name: calibre-web-data
         persistentVolumeClaim:
@@ -90,7 +85,7 @@ spec:
       {{- if .Values.persistence.library.enabled }}
       - name: calibre-web-library
         persistentVolumeClaim:
-          claimName: {{ default .Values.persistence.library.existingClaim (printf "%s-library" (include "calibre-web.fullname" .)) }}
+          claimName: {{ default (printf "%s-library" (include "calibre-web.fullname" .)) .Values.persistence.library.existingClaim }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: linuxserver/calibre-web
+  repository: registry.fmena.be/library/calibre-web
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -56,11 +56,8 @@ persistence:
 calibreWeb:
   timezone: Europe/Paris
   enableEbookConverter: false
-  #adminPassword:
-  #serverPort: 8083
-  libraryDir: /books
-  # Do not redefine `config_calibre_dir` as it is managed by previous
-  # `libraryDir` parameter.
+  adminUsername: admin
+  adminPassword: Admin123!
   #configuration:
   #  mail_server: mail.example.org
   #  mail_port: 25
