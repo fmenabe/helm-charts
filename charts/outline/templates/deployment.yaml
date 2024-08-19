@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "outline.fullname" . }}
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "outline.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "outline.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "outline.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if eq .Values.persistence.type "local" }}
+            - name: FILE_STORAGE_LOCAL_ROOT_DIR
+              value: {{ .Values.persistence.local.mountPath }}
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "outline.fullname" . }}-envs
+            - secretRef:
+                name: {{ include "outline.fullname" . }}-envs
+            {{- if eq .Values.persistence.type "s3" }}
+            - secretRef:
+                name: {{ include "outline.fullname" . }}-s3
+            {{- end }}
+
+            {{- if .Values.outline.oidc.enabled }}
+            - secretRef:
+                name: {{ include "outline.fullname" . }}-oidc
+            {{- end }}
+            {{- if .Values.outline.smtp.enabled }}
+            - secretRef:
+                name: {{ include "outline.fullname" . }}-smtp
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          {{- if eq .Values.persistence.type "local" }}
+            - name: {{ include "outline.fullname" . }}-data
+              mountPath: {{ .Values.persistence.local.mountPath }}
+          {{- end }}
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.extraVolumes }}
+      volumes:
+        {{- if eq .Values.persistence.type "local" }}
+        - name: {{ include "outline.fullname" . }}-data
+          persistentVolumeClaim:
+            name: {{ default .Values.persistence.local.existingClaim (printf "%s-data" (include "outline.fullname" .)) }}
+        {{- end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

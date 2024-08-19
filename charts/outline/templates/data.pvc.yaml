@@ -1,0 +1,21 @@
+{{- if eq .Values.persistence.type "local" }}
+{{- if not .Values.persistence.local.existingClaim }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "outline.fullnaame" . }}-data
+  labels:
+    {{- include "outline.labels" . | nindent 4 }}
+{{- if .Values.persistence.local.annotations }}
+annotations:
+{{ toYaml .Values.persistence.local.annotations | indent 2 }}
+{{- end}}
+spec:
+  accessModes:
+    - {{ .Values.persistence.local.accessMode }}
+  storageClassName: {{ default "" .Values.persistence.local.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.local.size | quote }}
+{{- end }}
+{{- end }}
