@@ -9,7 +9,6 @@ data:
   DATABASE_CONNECTION_POOL_MIN: {{ .Values.outline.databaseConnectionPoolMin | quote }}
   DATABASE_CONNECTION_POOL_MAX: {{ .Values.outline.databaseConnectionPoolMax | quote }}
   PGSSLMODE: {{ .Values.outline.pgsslMode }}
-  REDIS_URL: redis://{{ include "common.names.fullname" .Subcharts.redis }}-master:6379
   URL: https://{{ .Values.host }}
   COLLABORATION_URL:
   FILE_STORAGE: {{ .Values.persistence.type }}
